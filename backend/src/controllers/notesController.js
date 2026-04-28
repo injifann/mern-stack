@@ -1,19 +1,72 @@
-export function getAllNotes(req,res){
 
-     res.status(200).send('you got 50 notes');
+import Note from "../models/Notes.js";
+export async function getAllNotes(req,res){
+
+     try{
+        const notes=await Note.find();
+        res.status(200).json(notes)
+
+     }
+     catch(error)
+
+     {
+        console.error("Enternal server error",error)
+      res.status(500).json({message:"internal server error"})
+     }
 }
 
-export function createNote(req,res){
+export async function createNote(req,res){
+ try{
 
-    res.status(200).send("your notes are created successfully")
+        const {title,content}=req.body;
+        const newNote= new Note({title,content});
+        await newNote.save();
+res.status(201).json({message:"note created successfully"})
+
+
+ }
+ catch (error)
+ {
+    console.error("Error in the createNote controller",error);
+    res.status(500).json({message:"Internal server error"});
+ }
+
 
 }
 
-export function updateNote(req,res){
-        res.status(200).json({message:"post updated successfully"});
+export  async function updateNote(req,res)
+{
+try {
+       const {title,content}= req.body;
+       const updatedNote = await Note.findByIdAndUpdate(req.params.id,{title,content},
+        {
+                new:true
+        });
+
+       if(!updatedNote) return res.status(404).json({message:"Note note found"})
+
+
+           res.status(200).json({message:"note updated successfully"})
+}
+catch(error)
+{
+        console.error("Error in the updateNote controller",error);
+        res.status(500).json({message:"Internal server error"});
+}
+}
+export async function deleteNote(req,res){
+
+try
+{
+       const deletedNote = await Note.findByIdAndDelete(req.params.id);
+       if(!deletedNote) return res.status(404).json({message:"Note not found"});
+
+       res.status(200).json({message:"Note deleted successfully"});
 
 }
-export function deleteNote(req,res){
-        res.status(200).json({message:"post deleted successfully"})
-
+catch(error)
+{
+        console.error("Error in the deleteNote controller",error);
+        res.status(500).json({message:"Internal server error"});
+}
 }
